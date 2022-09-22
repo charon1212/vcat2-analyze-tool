@@ -1,7 +1,7 @@
 import { Alert, Button, Box, Typography, TextField, FormControl, RadioGroup, FormControlLabel, Radio, Grid, Paper } from '@mui/material';
 import { ReactNode, useState } from 'react';
 import { useTextField, useYesNoDialog } from '@charon1212/my-lib-react';
-import { Vcat2ApiPostOrderArgs } from '../../lib/vcat2Api/Vcat2ApiPostOrder';
+import { Vcat2ApiPostOrder, Vcat2ApiPostOrderArgs } from '../../lib/vcat2Api/Vcat2ApiPostOrder';
 import { validationPostOrderArgs } from './validationPostOrderArgs';
 
 export const ExecuteApiPostOrder = () => {
@@ -10,6 +10,7 @@ export const ExecuteApiPostOrder = () => {
   const [amountMarketBuy, , propAmountMarketBuy] = useTextField('');
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
   const [type, setType] = useState<'limit' | 'market'>('market');
+  const [requesting, setRequesting] = useState(false);
 
   const args: Vcat2ApiPostOrderArgs = {
     pair: 'btc_jpy',
@@ -26,7 +27,20 @@ export const ExecuteApiPostOrder = () => {
     message: `次のリクエストを送信します：${JSON.stringify(args)}`,
     onClickYes: (closeDialog) => {
       alert('送信！'); // TODO: 実装がまだ
-      closeDialog();
+      if (requesting) {
+        alert('重複リクエストはできません。');
+        return;
+      }
+      setRequesting(true);
+      Vcat2ApiPostOrder.request(args).then((response) => {
+        setRequesting(false);
+        if (response.success) {
+          alert(`リクエスト成功。orderId = [${response.data.orderId}]`);
+        } else {
+          alert(`リクエストエラー：[${response.message.join('] [')}]`);
+        }
+        closeDialog();
+      });
     },
     onClickNo: (closeDialog) => closeDialog(),
   });
@@ -50,7 +64,7 @@ export const ExecuteApiPostOrder = () => {
             </div>
             <div style={{ paddingRight: '10px' }}>
               <Button onClick={onClickRequest} variant='contained'>
-                !Request!
+                Request
               </Button>
             </div>
           </div>
