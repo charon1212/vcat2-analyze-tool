@@ -1,7 +1,8 @@
-import { Button, Box, Typography } from '@mui/material';
+import { Button, Box, Typography, IconButton, Paper } from '@mui/material';
 import { useState } from 'react';
-import { SimpleTable, useYesNoDialog } from '@charon1212/my-lib-react';
+import { SimpleTable } from '@charon1212/my-lib-react';
 import { Vcat2ApiGetOpenOrder, Vcat2ApiGetOpenOrderResponse } from '../../lib/vcat2Api/Vcat2ApiGetOpenOrder';
+import CachedIcon from '@mui/icons-material/Cached';
 
 type OpenOrder = Vcat2ApiGetOpenOrderResponse['orders'][number];
 
@@ -20,24 +21,31 @@ export const ExecuteApiGetOpenOrder = () => {
 
   return (
     <>
-      <Box sx={{ padding: '30px' }}>
-        <div>
-          <Typography variant='h4'>GetOpenOrder</Typography>
-          <Button onClick={onClickExecute}>Execute API</Button>
-        </div>
-        <div>
-          <SimpleTable
-            tableProp={{ size: 'small' }}
-            data={openOrders}
-            columns={[
-              { header: 'id', cell: ({ id }) => id },
-              { header: 'time', cell: ({ created_at }) => created_at },
-              { header: 'pair', cell: ({ pair }) => pair },
-              { header: 'rate', cell: ({ rate }) => rate },
-              { header: 'order_type', cell: ({ order_type }) => order_type },
-            ]}
-          />
-        </div>
+      <Box sx={{ padding: '10px' }}>
+        <Paper sx={{ padding: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div>
+              <Typography variant='h5'>open order</Typography>
+            </div>
+            <div>
+              <IconButton onClick={onClickExecute}>
+                <CachedIcon />
+              </IconButton>
+            </div>
+          </div>
+          <div style={{ width: '500px' }}>
+            <SimpleTable
+              tableProp={{ size: 'small' }}
+              data={openOrders}
+              columns={[
+                { header: 'time', cell: ({ created_at }) => created_at, sxCell: { padding: '0px', width: 200 } },
+                { header: 'pair', cell: ({ pair }) => pair, sxCell: { padding: '0px', width: 100 } },
+                { header: 'rate', cell: ({ rate }) => rate, sxCell: { padding: '0px', width: 100 } },
+                { header: 'order_type', cell: ({ order_type }) => order_type, sxCell: { padding: '0px', width: 100 } },
+              ]}
+            />
+          </div>
+        </Paper>
       </Box>
     </>
   );

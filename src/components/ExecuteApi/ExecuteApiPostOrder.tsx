@@ -1,4 +1,4 @@
-import { Alert, Button, Box, Typography, TextField, FormControl, RadioGroup, FormControlLabel, Radio, Grid } from '@mui/material';
+import { Alert, Button, Box, Typography, TextField, FormControl, RadioGroup, FormControlLabel, Radio, Grid, Paper } from '@mui/material';
 import { ReactNode, useState } from 'react';
 import { useTextField, useYesNoDialog } from '@charon1212/my-lib-react';
 import { Vcat2ApiPostOrderArgs } from '../../lib/vcat2Api/Vcat2ApiPostOrder';
@@ -25,14 +25,14 @@ export const ExecuteApiPostOrder = () => {
   const { yesNoDialog, openYesNoDialog } = useYesNoDialog({
     message: `次のリクエストを送信します：${JSON.stringify(args)}`,
     onClickYes: (closeDialog) => {
-      alert('送信！');
+      alert('送信！'); // TODO: 実装がまだ
       closeDialog();
     },
     onClickNo: (closeDialog) => closeDialog(),
   });
 
   const onClickRequest = () => {
-    if (validationMessage){
+    if (validationMessage) {
       alert('バリデーションエラーがあります');
       return;
     }
@@ -42,25 +42,31 @@ export const ExecuteApiPostOrder = () => {
   return (
     <>
       {yesNoDialog}
-      <Box sx={{ padding: '30px' }}>
-        <div style={{ padding: '10px' }}>
-          <Typography variant='h4'>PostOrder</Typography>
-        </div>
-        <div style={{ padding: '10px' }}>
-          {validationMessage ? <Alert severity='error'>{validationMessage}</Alert> : ''}
-          <SimpleGridLayout
-            rows={[
-              { label: 'Side', content: <RadioButtonGroup options={['buy', 'sell']} value={side} setter={setSide} /> },
-              { label: 'Type', content: <RadioButtonGroup options={['market', 'limit']} value={type} setter={setType} /> },
-              { label: 'Rate', visible: type === 'limit', content: <TextField {...propRate} /> },
-              { label: 'Amount', visible: type === 'limit' || side === 'sell', content: <TextField {...propAmount} /> },
-              { label: 'AmountMarketBuy', visible: type === 'market' && side === 'buy', content: <TextField {...propAmountMarketBuy} /> },
-            ]}
-          />
-        </div>
-        <div style={{ padding: '10px' }}>
-          <Button onClick={onClickRequest}>!Request!</Button>
-        </div>
+      <Box sx={{ padding: '10px' }}>
+        <Paper sx={{ padding: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <Typography variant='h5'>PostOrder</Typography>
+            </div>
+            <div style={{ paddingRight: '10px' }}>
+              <Button onClick={onClickRequest} variant='contained'>
+                !Request!
+              </Button>
+            </div>
+          </div>
+          <div>
+            {validationMessage ? <Alert severity='error'>{validationMessage}</Alert> : ''}
+            <SimpleGridLayout
+              rows={[
+                { label: 'Side', content: <RadioButtonGroup options={['buy', 'sell']} value={side} setter={setSide} /> },
+                { label: 'Type', content: <RadioButtonGroup options={['market', 'limit']} value={type} setter={setType} /> },
+                { label: 'Rate', visible: type === 'limit', content: <TextField {...propRate} /> },
+                { label: 'Amount', visible: type === 'limit' || side === 'sell', content: <TextField {...propAmount} /> },
+                { label: 'AmountMarketBuy', visible: type === 'market' && side === 'buy', content: <TextField {...propAmountMarketBuy} /> },
+              ]}
+            />
+          </div>
+        </Paper>
       </Box>
     </>
   );
