@@ -26,7 +26,6 @@ export const ExecuteApiPostOrder = () => {
   const { yesNoDialog, openYesNoDialog } = useYesNoDialog({
     message: `次のリクエストを送信します：${JSON.stringify(args)}`,
     onClickYes: (closeDialog) => {
-      alert('送信！'); // TODO: 実装がまだ
       if (requesting) {
         alert('重複リクエストはできません。');
         return;
