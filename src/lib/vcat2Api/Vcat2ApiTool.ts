@@ -18,6 +18,10 @@ export type ExpressFailureResponse = {
   message: string[],
 };
 
+const defaultHttpHeader = {
+  'content-type': 'application/json',
+};
+
 export class Vcat2ApiTool<RequestArgs, ResponseData> {
   constructor(private config: Vcat2ApiToolConfig<RequestArgs>) { };
   async request(args: RequestArgs) {
@@ -26,7 +30,7 @@ export class Vcat2ApiTool<RequestArgs, ResponseData> {
     const authorizationHeader = await getAuthorizationHeader();
     const response = await fetch(url, {
       method: this.config.method,
-      headers: { ...headers, ...authorizationHeader },
+      headers: { ...defaultHttpHeader, ...headers, ...authorizationHeader },
       body,
     });
     return response.json() as Promise<ExpressResponse<ResponseData>>;
