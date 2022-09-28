@@ -1,23 +1,35 @@
-import { Button, Box, Typography, IconButton, Paper } from '@mui/material';
+import { Box, Typography, Paper } from '@mui/material';
 import { useState } from 'react';
 import { SimpleTable } from '@charon1212/my-lib-react';
 import { Vcat2ApiGetOpenOrder, Vcat2ApiGetOpenOrderResponse } from '../../lib/vcat2Api/Vcat2ApiGetOpenOrder';
-import CachedIcon from '@mui/icons-material/Cached';
+import { UpdateIconButton } from './UpdateIconButton';
 
 type OpenOrder = Vcat2ApiGetOpenOrderResponse['orders'][number];
 
 export const ExecuteApiGetOpenOrder = () => {
   const [openOrders, setOpenOrders] = useState<OpenOrder[]>([]);
 
-  const onClickExecute = () => {
-    Vcat2ApiGetOpenOrder.request({}).then((response) => {
-      if (response.success) {
-        setOpenOrders(response.data.orders);
-      } else {
-        alert(`API通信でエラー: [${response.message.join('],[')}]`);
-      }
-    });
-  };
+  const updateButton = (
+    <UpdateIconButton
+      onClick={(completeUpdate) => {
+        Vcat2ApiGetOpenOrder.request({})
+          .then((response) => {
+            if (response.success) {
+              setOpenOrders(response.data.orders);
+            } else {
+              alert(`API通信でエラー: [${response.message.join('],[')}]`);
+            }
+          })
+          .catch((err) => {
+            alert('API通信に失敗');
+            console.error(err);
+          })
+          .finally(() => {
+            completeUpdate();
+          });
+      }}
+    />
+  );
 
   return (
     <>
@@ -27,11 +39,7 @@ export const ExecuteApiGetOpenOrder = () => {
             <div>
               <Typography variant='h5'>open order</Typography>
             </div>
-            <div>
-              <IconButton onClick={onClickExecute}>
-                <CachedIcon />
-              </IconButton>
-            </div>
+            <div>{updateButton}</div>
           </div>
           <div style={{ width: '500px' }}>
             <SimpleTable

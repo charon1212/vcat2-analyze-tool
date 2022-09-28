@@ -1,23 +1,35 @@
-import { Box, Typography, IconButton, Paper } from '@mui/material';
+import { Box, Typography, Paper } from '@mui/material';
 import { useState } from 'react';
 import { Vcat2ApiGetTransaction, Vcat2ApiGetTransactionResponse } from '../../lib/vcat2Api/Vcat2ApiGetTransaction';
 import { SimpleTable } from '@charon1212/my-lib-react';
-import CachedIcon from '@mui/icons-material/Cached';
+import { UpdateIconButton } from './UpdateIconButton';
 
 type Transaction = Vcat2ApiGetTransactionResponse['transactions'][number];
 
 export const ExecuteApiGetTransaction = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const onClickExecute = () => {
-    Vcat2ApiGetTransaction.request({}).then((response) => {
-      if (response.success) {
-        setTransactions(response.data.transactions.filter((_, i) => i < 15));
-      } else {
-        alert(`API通信でエラー: [${response.message.join('],[')}]`);
-      }
-    });
-  };
+  const updateButton = (
+    <UpdateIconButton
+      onClick={(completeUpdate) => {
+        Vcat2ApiGetTransaction.request({})
+          .then((response) => {
+            if (response.success) {
+              setTransactions(response.data.transactions.filter((_, i) => i < 15));
+            } else {
+              alert(`API通信でエラー: [${response.message.join('],[')}]`);
+            }
+          })
+          .catch((err) => {
+            alert('API通信に失敗');
+            console.error(err);
+          })
+          .finally(() => {
+            completeUpdate();
+          });
+      }}
+    />
+  );
 
   return (
     <>
@@ -27,11 +39,7 @@ export const ExecuteApiGetTransaction = () => {
             <div>
               <Typography variant='h5'>transaction</Typography>
             </div>
-            <div>
-              <IconButton onClick={onClickExecute}>
-                <CachedIcon />
-              </IconButton>
-            </div>
+            <div>{updateButton}</div>
           </div>
           <div style={{ width: '500px' }}>
             <SimpleTable
