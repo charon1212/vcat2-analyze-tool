@@ -31,15 +31,21 @@ export const ExecuteApiPostOrder = () => {
         return;
       }
       setRequesting(true);
-      Vcat2ApiPostOrder.request(args).then((response) => {
-        setRequesting(false);
-        if (response.success) {
-          alert(`リクエスト成功。orderId = [${response.data.orderId}]`);
-        } else {
-          alert(`リクエストエラー：[${response.message.join('] [')}]`);
-        }
-        closeDialog();
-      });
+      Vcat2ApiPostOrder.request(args)
+        .then((response) => {
+          setRequesting(false);
+          if (response.success) {
+            alert(`リクエスト成功。orderId = [${response.data.orderId}]`);
+          } else {
+            alert(`リクエストエラー：[${response.message.join('] [')}]`);
+          }
+          closeDialog();
+        })
+        .catch((err) => {
+          setRequesting(false);
+          alert('リクエスト失敗');
+          alert(`${JSON.stringify(err)}`);
+        });
     },
     onClickNo: (closeDialog) => closeDialog(),
   });
