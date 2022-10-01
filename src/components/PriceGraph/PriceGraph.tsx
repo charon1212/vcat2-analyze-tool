@@ -1,24 +1,37 @@
 import { useTextField } from '@charon1212/my-lib-react';
-import { Button, TextField, TextFieldProps, Typography } from '@mui/material';
+import { Checkbox, CheckboxProps, FormControlLabel, IconButton, Input, InputAdornment, InputProps, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { MyDate } from 'util-charon1212/build/main/MyDate';
 import { Vcat2ApiGetPriceHistory } from '../../lib/vcat2Api/Vcat2ApiGetPriceHistory';
 import { UpdateIconButton } from '../ExecuteApi/UpdateIconButton';
 import { LineChart } from './LineChart';
 import { SpanSelector } from './SpanSelector';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 export const PriceGraph = () => {
   const [timespan, setTimespan] = useState(MyDate.ms1h);
   const [thinSize, setThinSize] = useState(1);
-  const [textFieldLastTimestamp, textLastTimestamp, setTextLastTimestamp] = useScrollNumberField(MyDate.ms1m, `${Date.now()}`, { label: 'last' });
+  const [textFieldLastTimestamp, textLastTimestamp, setTextLastTimestamp] = useScrollNumberField(MyDate.ms1m, `${Date.now()}`, {
+    endAdornment: (
+      <InputAdornment position='end'>
+        <IconButton onClick={() => setTextLastTimestamp(`${Date.now()}`)}>
+          <AccessTimeIcon />
+        </IconButton>
+      </InputAdornment>
+    ),
+  });
   const [numLastTimestamp, setNumLastTimestamp] = useState(Date.now());
-  const [fixYAxis, setFixYAxis] = useState(true);
+  const [checkBoxFixYAxis, fixYAxis] = useCheckBox('Y幅固定', false);
+  const [checkBoxShowPercent, showPercent] = useCheckBox('%表示', false);
   const { priceList, updatePriceList, minPrice, maxPrice } = usePriceList();
 
   const updateButton = (
     <UpdateIconButton
       onClick={(updated) => {
-        if (isNaN(+textLastTimestamp)) return alert('lastが数値ではありません。');
+        if (isNaN(+textLastTimestamp)) {
+          alert('lastが数値ではありません。');
+          updated();
+        }
         setNumLastTimestamp(+textLastTimestamp);
         updatePriceList(+textLastTimestamp).finally(() => updated());
       }}
@@ -39,14 +52,11 @@ export const PriceGraph = () => {
           <div>
             <Typography variant='h4'>PriceHistory</Typography>
           </div>
-          <div style={{ margin: '0 10px 0' }}>{updateButton}</div>
-          <div style={{ margin: '0 10px 0' }}>{textFieldLastTimestamp}</div>
           <div style={{ margin: '0 10px 0' }}>
-            <Button onClick={() => setTextLastTimestamp(`${Date.now()}`)} variant='contained'>
-              Now
-            </Button>
+            <div>{textFieldLastTimestamp}</div>
+            <div>{localeStringLastTimestamp}</div>
           </div>
-          <div style={{ margin: '0 10px 0' }}>{localeStringLastTimestamp}</div>
+          <div style={{ margin: '0 10px 0' }}>{updateButton}</div>
           <div style={{ margin: '0 10px 0' }}>
             <SpanSelector
               onSelect={({ timespan, thinSize }) => {
@@ -55,6 +65,11 @@ export const PriceGraph = () => {
               }}
             />
           </div>
+          <div style={{ margin: '0 10px 0' }}>
+            <div>{checkBoxFixYAxis}</div>
+            <div>{checkBoxShowPercent}</div>
+          </div>
+          <div style={{ margin: '0 10px 0' }}></div>
         </div>
         <div style={{ margin: '10px' }}></div>
         <div>
@@ -97,12 +112,12 @@ const usePriceList = () => {
   return { priceList, updatePriceList, minPrice, maxPrice };
 };
 
-const useScrollNumberField = (delta: number, initValue: string, textFieldProp?: TextFieldProps) => {
+const useScrollNumberField = (delta: number, initValue: string, inputProps?: InputProps) => {
   const [value, setValue, prop] = useTextField(initValue);
   const textField = (
-    <TextField
+    <Input
       {...prop}
-      {...textFieldProp}
+      {...inputProps}
       onWheel={(e) => {
         if (isNaN(+value)) return;
         const d = e.deltaY / Math.abs(e.deltaY);
@@ -111,4 +126,10 @@ const useScrollNumberField = (delta: number, initValue: string, textFieldProp?: 
     />
   );
   return [textField, value, setValue] as const;
+};
+
+const useCheckBox = (label: string, init: boolean = false, checkBoxProps?: CheckboxProps) => {
+  const [checked, setChecked] = useState(init);
+  const checkBox = <FormControlLabel label={label} control={<Checkbox value={checked} onChange={(_, c) => setChecked(c)} {...checkBoxProps} />} />;
+  return [checkBox, checked, setChecked] as const;
 };
