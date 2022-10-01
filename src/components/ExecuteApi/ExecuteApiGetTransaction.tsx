@@ -15,7 +15,7 @@ export const ExecuteApiGetTransaction = () => {
         Vcat2ApiGetTransaction.request({})
           .then((response) => {
             if (response.success) {
-              setTransactions(response.data.transactions.filter((_, i) => i < 15));
+              setTransactions(response.data.transactions.filter((_, i) => i < 10));
             } else {
               alert(`API通信でエラー: [${response.message.join('],[')}]`);
             }
