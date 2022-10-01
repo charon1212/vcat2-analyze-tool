@@ -1,5 +1,5 @@
 export type Vcat2ApiToolConfig<RequestArgs> = {
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'DELETE',
   createRequest: (args: RequestArgs) => {
     uri: string,
     headers?: { [key: string]: string },
