@@ -1,5 +1,5 @@
 import { Box, Typography, Paper } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SimpleTable } from '@charon1212/my-lib-react';
 import { Vcat2ApiGetOpenOrder, Vcat2ApiGetOpenOrderResponse } from '../../lib/vcat2Api/Vcat2ApiGetOpenOrder';
 import { UpdateIconButton } from './UpdateIconButton';
@@ -9,24 +9,30 @@ type OpenOrder = Vcat2ApiGetOpenOrderResponse['orders'][number];
 export const ExecuteApiGetOpenOrder = () => {
   const [openOrders, setOpenOrders] = useState<OpenOrder[]>([]);
 
+  const updateOpenOrder = () =>
+    Vcat2ApiGetOpenOrder.request({})
+      .then((response) => {
+        if (response.success) {
+          setOpenOrders(response.data.orders);
+        } else {
+          alert(`API通信でエラー: [${response.message.join('],[')}]`);
+        }
+      })
+      .catch((err) => {
+        alert('API通信に失敗');
+        console.error(err);
+      });
+
+  useEffect(() => {
+    updateOpenOrder();
+  }, []);
+
   const updateButton = (
     <UpdateIconButton
       onClick={(completeUpdate) => {
-        Vcat2ApiGetOpenOrder.request({})
-          .then((response) => {
-            if (response.success) {
-              setOpenOrders(response.data.orders);
-            } else {
-              alert(`API通信でエラー: [${response.message.join('],[')}]`);
-            }
-          })
-          .catch((err) => {
-            alert('API通信に失敗');
-            console.error(err);
-          })
-          .finally(() => {
-            completeUpdate();
-          });
+        updateOpenOrder().finally(() => {
+          completeUpdate();
+        });
       }}
     />
   );

@@ -1,5 +1,5 @@
 import { Box, Typography, Paper } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Vcat2ApiGetTransaction, Vcat2ApiGetTransactionResponse } from '../../lib/vcat2Api/Vcat2ApiGetTransaction';
 import { SimpleTable } from '@charon1212/my-lib-react';
 import { UpdateIconButton } from './UpdateIconButton';
@@ -9,24 +9,30 @@ type Transaction = Vcat2ApiGetTransactionResponse['transactions'][number];
 export const ExecuteApiGetTransaction = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
+  const updateTransaction = () =>
+    Vcat2ApiGetTransaction.request({})
+      .then((response) => {
+        if (response.success) {
+          setTransactions(response.data.transactions.filter((_, i) => i < 10));
+        } else {
+          alert(`API通信でエラー: [${response.message.join('],[')}]`);
+        }
+      })
+      .catch((err) => {
+        alert('API通信に失敗');
+        console.error(err);
+      });
+
+  useEffect(() => {
+    updateTransaction();
+  }, []);
+
   const updateButton = (
     <UpdateIconButton
       onClick={(completeUpdate) => {
-        Vcat2ApiGetTransaction.request({})
-          .then((response) => {
-            if (response.success) {
-              setTransactions(response.data.transactions.filter((_, i) => i < 10));
-            } else {
-              alert(`API通信でエラー: [${response.message.join('],[')}]`);
-            }
-          })
-          .catch((err) => {
-            alert('API通信に失敗');
-            console.error(err);
-          })
-          .finally(() => {
-            completeUpdate();
-          });
+        updateTransaction().finally(() => {
+          completeUpdate();
+        });
       }}
     />
   );
